@@ -4,7 +4,8 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 from api.repositories.postgres_repository import PostgresDB
 from api.services import EntryService
-
+from api.loging import logger
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -14,16 +15,21 @@ router = APIRouter()
 # TODO: Add API versioning
 # TODO: Add response caching
 
+class Entry(BaseModel):
+    work: str
+    struggle: str
+    intention: str
+
 async def get_entry_service() -> AsyncGenerator[EntryService, None]:
 
     async with PostgresDB() as db:
         yield EntryService(db)
 
-@router.post("/entries/")
-async def create_entry(request: Request, entry: dict, entry_service: EntryService = Depends(get_entry_service)):
-
+@router.post("/entries")
+async def create_entry(request: Request, entry: Entry, entry_service: EntryService = Depends(get_entry_service)):
+    logger.info("Initiating POST /entries/")
     entry_data = {
-        k: v for k, v in entry.items()
+        k: v for k, v in entry.model_dump().items()
         if k not in ['id', 'created_at', 'updated_at']
     }
     async with PostgresDB() as db:
@@ -45,18 +51,49 @@ async def create_entry(request: Request, entry: dict, entry_service: EntryServic
 # Example response: [{"id": "123", "work": "...", "struggle": "...", "intention": "..."}]
 @router.get("/entries")
 async def get_all_entries(request: Request):
-    # TODO: Implement get all entries endpoint
-    # Hint: Use PostgresDB and EntryService like other endpoints
-    pass
+    logger.info('Initiating GET /entries')
+    async with PostgresDB() as db:
+        entry_service = EntryService(db)
+        try:
+            data = await entry_service.get_all_entries()
+            revised_data = []
+            for row in data:
+                revised_data.append({
+                    "id": row["id"],
+                    "work": row["data"]["work"],
+                    "struggle": row["data"]["struggle"],
+                    "intention": row["data"]["intention"]
+                })
+        except HTTPException as e:
+            raise e
+        return revised_data
 
 @router.get("/entries/{entry_id}")
 async def get_entry(request: Request, entry_id: str):
     # TODO: Implement get single entry endpoint
     # Hint: Return 404 if entry not found
-    pass
+    logger.info("Initiating GET /entries/:entry_id")
+    async with PostgresDB() as db:
+        entry_service = EntryService(db)
+        try:
+            result = await entry_service.get_entry(entry_id)
+            revised_result = {
+                "id": result["id"],
+                "work": result["data"]["work"],
+                "struggle": result["data"]["struggle"],
+                "intention": result["data"]["intention"]
+            }
+            return revised_result
+        except HTTPException as e:
+            if (e.status_code == 404):
+                raise HTTPException(
+                    status_code=404,
+                    detail="Entry not found."
+                )
 
 @router.patch("/entries/{entry_id}")
 async def update_entry(request: Request, entry_id: str, entry_update: dict):
+    logger.info("Initiating PATCH request")
     async with PostgresDB() as db:
         entry_service = EntryService(db)
         result = await entry_service.update_entry(entry_id, entry_update)
@@ -72,7 +109,10 @@ async def update_entry(request: Request, entry_id: str, entry_update: dict):
 async def delete_entry(request: Request, entry_id: str):
     # TODO: Implement delete entry endpoint
     # Hint: Return 404 if entry not found
-    pass
+    logger.info("Initiating DELETE /entries/:id")
+    async with PostgresDB() as db:
+        entry_service = EntryService(db)
+        await entry_service.delete_entry(entry_id)
 
 @router.delete("/entries")
 async def delete_all_entries(request: Request):

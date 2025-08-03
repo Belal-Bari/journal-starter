@@ -7,7 +7,7 @@ from typing import Any, Dict, List
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from api.repositories.interface_respository import DatabaseInterface
-
+from fastapi import HTTPException
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -43,6 +43,7 @@ class PostgresDB(DatabaseInterface):
         async with self.pool.acquire() as conn:
             query = "SELECT * FROM entries"
             rows = await conn.fetch(query)
+            
             return [
                 {
                     **dict(row), 
@@ -54,13 +55,17 @@ class PostgresDB(DatabaseInterface):
     async def get_entry(self, entry_id: str) -> Dict[str, Any]:
         async with self.pool.acquire() as conn:
             query = "SELECT * FROM entries WHERE id = $1"
-            row = await conn.fetchrow(query, entry_id)
-            
-            if row:
-                entry = dict(row)
-                entry["data"] = json.loads(entry["data"])
-                return entry
-            return None
+            try:
+                row = await conn.fetchrow(query, entry_id)
+                
+                if row:
+                    entry = dict(row)
+                    entry["data"] = json.loads(entry["data"])
+                    return entry
+                else:
+                    raise HTTPException(status_code=404, detail="No entry found with that ID")
+            except Exception as e:
+                raise HTTPException(status_code=404, detail="ID not valid")
    
     async def update_entry(self, entry_id: str, updated_data: Dict[str, Any]) -> None:
         updated_at = datetime.now(timezone.utc)
@@ -80,7 +85,14 @@ class PostgresDB(DatabaseInterface):
     async def delete_entry(self, entry_id: str) -> None:
         async with self.pool.acquire() as conn:
             query = "DELETE FROM entries WHERE id = $1"
-            await conn.execute(query, entry_id)
+            try:
+                
+                await conn.execute(query, entry_id)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=404,
+                    detail={"Invalid ID"}
+                )
 
     async def delete_all_entries(self) -> None:
         async with self.pool.acquire() as conn:

@@ -41,6 +41,7 @@ class EntryService:
         """Gets a specific entry."""
         logger.info("Fetching entry %s", entry_id)
         entry = await self.db.get_entry(entry_id)
+        print(entry)
         if entry:
             logger.debug("Entry %s found", entry_id)
         else:
@@ -68,6 +69,7 @@ class EntryService:
     async def delete_entry(self, entry_id: str) -> None:
         """Deletes a specific entry."""
         logger.info("Deleting entry %s", entry_id)
+        await self.db.get_entry(entry_id)
         await self.db.delete_entry(entry_id)
         logger.debug("Entry %s deleted", entry_id)
 
