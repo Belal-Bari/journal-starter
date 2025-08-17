@@ -1,15 +1,13 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'docker:20.10-dind'
+            args '--privileged -v /var/lib/docker'
+        }
+    }
 
     stages {
         stage('Build') {
-            agent {
-                docker {
-                    image 'docker:20.10-dind'
-                    args '--privileged -v /var/lib/docker'
-                    reuseNode true
-                }
-            }
             steps {
                 echo 'Building...'
                 sh '''
