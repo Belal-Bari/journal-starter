@@ -1,15 +1,11 @@
 pipeline {
-    agent any
+    agent {
+        docker { image 'docker-agent' }
+    }
 
     stages {
         stage('Build') {
-            agent {
-                docker {
-                    image 'docker-agent:latest'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
-                    reuseNode true
-                }
-            }
+            
             steps {
                 echo 'Building...'
                 sh '''
