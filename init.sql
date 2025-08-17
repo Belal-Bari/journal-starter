@@ -1,0 +1,6 @@
+CREATE TABLE entries (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    data JSON NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
