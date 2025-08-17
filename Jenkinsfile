@@ -3,13 +3,6 @@ pipeline {
 
     stages {
         stage('Build') {
-            agent {
-                docker {
-                    image 'docker:24-cli'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
-                    reuseNode true
-                }
-            }
             steps {
                 echo 'Building...'
                 sh '''
