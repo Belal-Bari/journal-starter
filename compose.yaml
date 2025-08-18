@@ -12,7 +12,7 @@ services:
       DATABASE_URL: "postgresql://postgres:postgres@postgres/journal_db"
   
   postgres:
-    image: postgres:15-alpine
+    image: postgres:15
     ports: 
       - 5432:5432
     environment:

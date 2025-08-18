@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE entries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     data JSON NOT NULL,
