@@ -19,6 +19,8 @@ pipeline {
                 echo 'Booting containers: postgres and test_app:latest'
                 sh ''' 
                     docker-compose -f compose.yaml up
+                    
+
                     pg_isready -h postgres -p 5432 -U postgres
                     curl -X POST http://localhost:8000/entries \
                     -H "Content-Type: application/json" \
