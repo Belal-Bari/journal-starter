@@ -2,7 +2,7 @@ services:
   backend_api:
     image: test_app:ver1.0
     ports: 
-      - 3000:3000
+      - 8000:8000
     depends_on:
       - postgres
     environment:
