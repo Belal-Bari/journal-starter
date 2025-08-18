@@ -27,6 +27,7 @@ pipeline {
                         "struggle": "Understanding async/await",
                         "intention": "Practice more with FastAPI"
                     }'
+                    curl http://localhost:8000/entries
                 '''
             }
         }
