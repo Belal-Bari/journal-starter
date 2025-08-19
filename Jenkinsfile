@@ -16,11 +16,6 @@ pipeline {
                     docker-compose --version
                 '''
             }
-            post {
-                always {
-                    sh "docker compose down -v"
-                }
-            }
         }
     }
 }
