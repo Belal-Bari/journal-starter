@@ -17,7 +17,15 @@ pipeline {
                     docker-compose --version
                     docker compose up -d
                     echo "Waiting for services..."
-                    sleep 15
+                    sleep 10
+                    curl -X POST http://localhost:8000/entries \
+                    -H "Content-Type: application/json" \
+                    -d '{
+                        "work": "Learned FastAPI basics",
+                        "struggle": "Understanding async/await",
+                        "intention": "Practice more with FastAPI"
+                    }'
+                    curl http://localhost:8000/entries
                 '''
             }
             post {
