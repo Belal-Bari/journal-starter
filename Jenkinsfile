@@ -9,6 +9,13 @@ pipeline {
                     args '-v /var/run/docker.sock:/var/run/docker.sock -v $WORKSPACE:/workspace -w /workspace'
                 }
             }
+            steps {
+                echo 'Inside docker-agent'
+                sh '''
+                    docker --version
+                    docker-compose --version
+                '''
+            }
             post {
                 always {
                     sh "docker compose down -v"
