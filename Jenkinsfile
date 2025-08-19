@@ -26,6 +26,7 @@ pipeline {
                         "intention": "Practice more with FastAPI"
                     }'
                     docker compose exec backend_api curl http://localhost:8000/entries
+                    docker compose logs backend_api
                 '''
             }
             post {
