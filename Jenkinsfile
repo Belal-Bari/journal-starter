@@ -23,7 +23,14 @@ pipeline {
                         sleep 2
                     done
                     echo 'Creating table entries'
-                    docker compose exec postgres psql -U postgres -d journal_db -f /workspace/init.sql
+                    docker compose exec postgres psql -U postgres -d journal_db -c "
+                    CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";
+                    CREATE TABLE IF NOT EXISTS entries (
+                        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                        data JSON NOT NULL,
+                        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                    );"
                     echo "Checking tables in journal_db..."
                     docker compose exec postgres psql -U postgres -d journal_db -c "\\dt"
                     docker compose exec backend_api curl -X POST http://localhost:8000/entries \
