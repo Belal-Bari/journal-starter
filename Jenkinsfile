@@ -6,8 +6,8 @@ pipeline {
             agent {
                 docker {
                     image "docker-agent"
-                    args '-v /var/run/docker.sock:/var/run/docker.sock -v $WORKSPACE:/workspace -w /workspace'
-                    user 'root'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock -v $WORKSPACE:/workspace -w /workspace --user root'
+                    
                 }
             }
             steps {
