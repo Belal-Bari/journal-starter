@@ -14,7 +14,15 @@ pipeline {
                 sh '''
                     docker --version
                     docker-compose --version
+                    docker compose up -d
+                    echo "Waiting for services..."
+                    sleep 15
                 '''
+            }
+            post {
+                always {
+                    sh 'docker compose down -v'
+                }
             }
         }
     }
