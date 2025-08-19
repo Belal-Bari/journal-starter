@@ -18,7 +18,13 @@ pipeline {
                     docker compose up -d
                     echo "Waiting for services..."
                     sleep 10
-                    docker compose exec postgres psql -U postgres -d journal_db -c "\dt"
+                    echo "Waiting for Postgres to be ready..."
+                    until docker compose exec postgres pg_isready -U postgres; do
+                        sleep 2
+                    done
+
+                    echo "Checking tables in journal_db..."
+                    docker compose exec postgres psql -U postgres -d journal_db -c "\\dt"
                     docker compose exec backend_api curl -X POST http://localhost:8000/entries \
                     -H "Content-Type: application/json" \
                     -d '{
